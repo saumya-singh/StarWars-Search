@@ -8,7 +8,6 @@ def film_details_dictionary(film_dict_api):
     film_details = {}
     entity_list = ["planets", "starships", "vehicles", "species"]
     for entity in entity_list:
-        print("^^^^^^^^^^^^^^^", entity, "^^^^^^^^^^^^^^^^")
         entity_details = entity_details_dictionary(film_dict_api[entity], entity)
         film_details[entity] = entity_details
     characters_details = characters_details_dictionary(film_dict_api["characters"])
@@ -32,7 +31,6 @@ def characters_details_dictionary(characters_url_list):
         del character_dict["edited"]
         del character_dict["url"]
         entity_details = entity_details_dictionary([character_dict["homeworld"]], "homeworld")
-        print("homeworld-----------------")
         character_dict["homeworld"] = entity_details
         entity_list = ["starships", "vehicles", "species"]
         for entity in entity_list:
@@ -44,10 +42,7 @@ def characters_details_dictionary(characters_url_list):
 
 def entity_details_dictionary(entity_list, name_of_entity):
     entity = {}
-    print("entity list: ", entity_list)
     for entity_url in entity_list:
-        print("1!!!!!!!!!!!!!!!!!!!!!!!", entity_url)
-        print("++++++", entity_url)
         res = requests.get(entity_url)
         entity_dict = json.loads(res.content.decode())
         entity_name = entity_dict["name"]
@@ -58,11 +53,6 @@ def entity_details_dictionary(entity_list, name_of_entity):
         del entity_dict["url"]
         if name_of_entity == "planets" or name_of_entity == "homeworld":
             del entity_dict["residents"]
-            print("%%%%%%%%%%%")
-            print()
-            pprint(entity_dict)
-            print()
-            print("%%%%%%%%%%%")
         elif name_of_entity == "species":
             del entity_dict["people"]
             del entity_dict["homeworld"]
@@ -74,18 +64,12 @@ def entity_details_dictionary(entity_list, name_of_entity):
 
 def main():
     for index in range(1,8):
-        print("============{}===========", index)
+        print("Working on film {} ...".format(index))
         swapi_url = "https://swapi.co/api/films/{}/".format(index)
         response = requests.get(swapi_url)
         film_dict_api = json.loads(response.content.decode())
         film_details = film_details_dictionary(film_dict_api)
-        # print("**********", index)
-        # print(film_details)
-        # print("**********")
         film_details_str = json.dumps(film_details)
-        print("&&&&&&&&&&&&&&&&&", film_details_str)
-        # film_details_str.replace("'", '"')
-        # print(film_details_str)
 
         url = "http://localhost:9200/star_wars_films/_doc/{}".format(index)
         # payload = '{}'.format()
@@ -98,7 +82,9 @@ def main():
 
         response = requests.put(url, auth=auth_credentials, data=payload, headers=headers)
         s = json.loads(response.content.decode())
-        print(".... Loaded")
+        print("=======================")
+        pprint(s)
+        print(".... Ingested")
 
 
 if __name__ == "__main__":
